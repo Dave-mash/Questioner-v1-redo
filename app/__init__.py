@@ -1,5 +1,5 @@
 from flask import Flask 
-from config import app_config
+from app.config import app_config
 from app.api.v1.views.meetup_views import v1 as meetup_v1
 from app.api.v1.views.question_views import v1 as question_v1
 
