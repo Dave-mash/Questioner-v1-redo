@@ -103,3 +103,8 @@ class TestBaseModel(unittest.TestCase):
         self.users.delete_item(1)
         self.assertFalse(self.users.db)
     
+    def tearDown(self):
+
+        self.meetup_item = {}
+        self.user_item = {}
+        self.question_item = {}
