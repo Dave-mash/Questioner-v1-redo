@@ -9,11 +9,7 @@ users_list = []
 class BaseModel:
 
     def __init__(self, db_name=''):
-
-        if isinstance(db_name, str):
-            self.db_name = db_name
-        else:
-            print('db_name must be a string')
+        self.db_name = db_name
 
         self.db = None
         self.meetups_list = meetups_list
@@ -30,6 +26,10 @@ class BaseModel:
         else:
             self.db = None
             return'Invalid db_name'
+
+    def add_item(self, item):
+        self.check_db()
+        self.db.append(item)
 
     def delete_item(self, item_id):
         self.check_db()
