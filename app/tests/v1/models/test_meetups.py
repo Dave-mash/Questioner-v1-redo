@@ -41,7 +41,7 @@ class TestMeetup(unittest.TestCase):
         self.assertEqual(meetup['id'], 1)
         
         meetup2 = self.meetup.fetch_specific_meetup(5)
-        self.assertEqual(meetup2, 'No item found')
+        self.assertFalse(meetup2)
 
     def test_edit_meetup(self):
 
@@ -60,4 +60,4 @@ class TestMeetup(unittest.TestCase):
 
         meetup = self.meetup.fetch_specific_meetup(1)
 
-        self.assertEqual(meetup, 'No item found')
+        self.assertFalse(meetup)
