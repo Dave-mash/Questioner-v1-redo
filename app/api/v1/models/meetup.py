@@ -10,13 +10,14 @@ class Meetup(BaseModel):
 
     def __init__(self, meetup={}):
 
-        self.id = len(self.fetch_meetups())
-        self.createdOn = datetime.now()
-        self.location = meetup['location']
-        self.images = meetup['images']
-        self.topic = meetup['topic']
-        self.happeningOn = meetup['happeningOn']
-        self.tags = meetup['tags']
+        if meetup:
+            self.id = len(self.fetch_meetups())
+            self.createdOn = datetime.now()
+            self.location = meetup['location']
+            self.images = meetup['images']
+            self.topic = meetup['topic']
+            self.happeningOn = meetup['happeningOn']
+            self.tags = meetup['tags']
 
     def save_meetup(self):
 
@@ -45,7 +46,7 @@ class Meetup(BaseModel):
         if item:
             return item[0]
         else:
-            return 'No item found'
+            return False
 
     def edit_meetup(self, id, udpates):
 
