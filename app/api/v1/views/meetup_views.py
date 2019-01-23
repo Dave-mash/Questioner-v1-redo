@@ -21,11 +21,21 @@ def get_all_meetups():
 def post_a_meetup():
     data = request.get_json()
 
+    fields = ['topic', 'description', 'location', 'images', 'happeningOn', 'tags']
+
+    for key in fields:
+        try:
+            data[key]
+        except:
+            return jsonify({
+                "error": 'You missed the {} key, value pair'.format(key)
+            })
+
     meetup = {
         "topic": data['topic'],
         "description": data['description'],
         "location": data['location'],
-        "images": ["img1", "img2"],
+        "images": data['images'],
         "happeningOn": data['happeningOn'],
         "tags": data['tags'],
     }
@@ -62,6 +72,36 @@ def get_meetup(meetupId):
             "status": 404,
             "error": "No meetup found!"
         }), 404
+
+
+""" This route edits a meetup """
+@v1.route("meetups/<int:meetupId>", methods=['PATCH'])
+def edit_meetup(meetupId):
+    data = request.get_json()
+
+    meetup = Meetup().fetch_specific_meetup(meetupId)
+
+    if meetup:
+
+        updates = {
+            "topic": data['topic'],
+            "description": data['description'],
+            "location": data['location'],
+            "images": ["img1", "img2"],
+            "happeningOn": data['happeningOn'],
+            "tags": data['tags']
+        }
+
+        Meetup().edit_meetup(meetupId, updates)
+        return jsonify({
+            "status": 200,
+            "message": "{} was updated".format(meetup['topic'].upper())
+        }), 200
+    else:
+        return make_response(jsonify({
+            "error": 'meetup not found!',
+            "status": 404
+        }), 404)
 
 
 """ This route deletes a specific meetup """

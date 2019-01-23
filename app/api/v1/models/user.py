@@ -1,0 +1,79 @@
+"""
+This module sets up the question model and all it's functionality
+"""
+
+from datetime import datetime
+
+from app.api.v1.models.base_model import BaseModel
+
+class User(BaseModel):
+    
+    base_model = BaseModel('user_db')
+
+    def __init__(self, user={}):
+
+        if user:
+            self.id = len(self.fetch_users())
+            self.createdOn = str(datetime.today())
+            self.Fname = user['first_name']
+            self.Lname = user['last_name']
+            self.othername = user['othername']
+            self.email = user['email']
+            self.phoneNumber = user['phoneNumber']
+            self.username = user['username']
+            self.password = user['password']
+            self.isAdmin = False
+            self.rsvps = []
+
+    def save_user(self):
+
+        user_item = {
+            "id": self.id,
+            "dateRegistered": self.createdOn,
+            "first_name": self.Fname,
+            "last_name": self.Lname,
+            "othername": self.othername,
+            "email": self.email,
+            "phoneNumber": self.phoneNumber,
+            "username": self.username,
+            "password": self.password,
+            "isAdmin": self.isAdmin,
+            "rsvps": self.rsvps
+        }
+
+        self.base_model.add_item(user_item)
+
+    def fetch_users(self):
+
+        return self.base_model.users_list
+
+    # Log in user
+    def log_in_user(self, details):
+
+        # Check if user details exists
+        users = self.fetch_users()
+        email = [email for email in users if email['email'] == details['email']]
+        password = [p_word for p_word in users if p_word['password'] == details['password']]
+
+        if email and password:
+            return True
+        else:
+            return False
+
+    def fetch_specific_user(self, id):
+
+        db = self.base_model.users_list
+        user = [user for user in db if user['id'] == id]
+
+        if user:
+            return user[0]
+        else:
+            return False
+
+    def edit_user(self, id, udpates):
+
+        self.base_model.edit_item(id, udpates)
+
+    def delete_user(self, id):
+
+        self.base_model.delete_item(id)

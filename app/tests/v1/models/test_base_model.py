@@ -1,5 +1,5 @@
 """
-This module tests that the base model works correctly
+This module contains tests for the base model
 """
 
 # 3rd party imports
@@ -14,6 +14,7 @@ class TestBaseModel(unittest.TestCase):
         self.meetup = BaseModel('meetup_db')
         self.questions = BaseModel('question_db')
         self.users = BaseModel('user_db')
+        self.comments = BaseModel('comment_db')
 
         self.meetup_item = {"content": 'item', "id": 1}
         self.user_item = {"question": 'a question', "id": 1}
@@ -36,6 +37,11 @@ class TestBaseModel(unittest.TestCase):
         self.users.check_db()
         self.assertEqual(self.users.db_name, 'user_db')
         self.assertEqual(self.users.db, self.users.users_list)
+
+        # test comments_db
+        self.comments.check_db()
+        self.assertEqual(self.comments.db_name, 'comment_db')
+        self.assertEqual(self.comments.db, self.comments.comments_list)
 
         # test invalid db_name
         other = BaseModel('other')

@@ -3,7 +3,7 @@ This module tests the meetup_validator endpoint
 """
 
 import unittest
-from app.api.v1.utils.meetup_validators import MeetupValidator
+from app.api.v1.utils.question_validators import MeetupValidator
 
 class TestQuestionsValidator(unittest.TestCase):
 

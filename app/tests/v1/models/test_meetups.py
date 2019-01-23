@@ -1,3 +1,7 @@
+"""
+This module contains tests the meetup model 
+"""
+
 import unittest
 
 from app.api.v1.models.base_model import BaseModel
@@ -15,7 +19,8 @@ class TestMeetup(unittest.TestCase):
             "images": ['img1', 'img2'],
             "topic": 'Python',
             "happeningOn": '15/10/2019',
-            "tags": ['Django', 'Flask']
+            "tags": ['Django', 'Flask'],
+            "questions": []
         }
         self.meetup = Meetup(self.meetup_item)
 

@@ -5,6 +5,7 @@ This module serves as a database mock-up for the project
 meetups_list = []
 questions_list = []
 users_list = []
+comments_list = []
 
 class BaseModel:
 
@@ -15,6 +16,7 @@ class BaseModel:
         self.meetups_list = meetups_list
         self.questions_list = questions_list
         self.users_list = users_list
+        self.comments_list = comments_list
 
     def check_db(self):
         if self.db_name == 'meetup_db':
@@ -23,6 +25,8 @@ class BaseModel:
             self.db = self.questions_list
         elif self.db_name == 'user_db':
             self.db = self.users_list
+        elif self.db_name == 'comment_db':
+            self.db = self.comments_list
         else:
             self.db = None
             return'Invalid db_name'
