@@ -11,6 +11,7 @@ class TestUser(unittest.TestCase):
     def setUp(self):
 
         self.user_item = {
+            "id": 1,
             "first_name": "David",
             "last_name": "mash",
             "othername": "Dave",

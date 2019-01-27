@@ -2,6 +2,10 @@
 This module serves as a database mock-up for the project
 """
 
+import os
+import jwt
+import datetime
+
 meetups_list = []
 questions_list = []
 users_list = []
@@ -17,6 +21,44 @@ class BaseModel:
         self.questions_list = questions_list
         self.users_list = users_list
         self.comments_list = comments_list
+
+    @staticmethod
+    def encode_auth_token(user_id):
+        """ This method generates authentication token """
+        from app import create_app
+
+        app = create_app('development')
+
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+                'iat': datetime.datetime.utcnow(),
+                'sub': user_id
+            }
+            return jwt.encode(
+                payload,
+                app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return e
+
+    def blacklisted(self):
+        pass
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        """ This method takes in token and decodes it """
+        from app import create_app
+        app = create_app('development')
+
+        try:
+            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return 'Signature expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token. Please log in again.'
 
     def check_db(self):
         if self.db_name == 'meetup_db':

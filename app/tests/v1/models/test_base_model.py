@@ -30,6 +30,17 @@ class TestBaseModel(unittest.TestCase):
         }
         self.question_item = {"name": 'dave', "id": 1}
 
+    def test_encode_auth_token(self):
+        
+        auth_token = self.users.encode_auth_token(1)
+        self.assertTrue(isinstance(auth_token, bytes))
+
+    def test_decode_auth_token(self):
+
+        auth_token = self.users.encode_auth_token(1)
+        self.assertTrue(isinstance(auth_token, bytes))
+        self.assertTrue(self.users.decode_auth_token(auth_token) == 1)
+
     def test_check_db(self):
         """ Test base model's check_db method  works as expected """
 

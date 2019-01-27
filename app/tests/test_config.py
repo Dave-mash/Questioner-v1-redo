@@ -8,6 +8,7 @@ class TestDevelopmentConfig(unittest.TestCase):
 
     def test_app_is_development(self):
         self.assertTrue(self.app.config['DEBUG'] is True)
+        self.assertFalse(self.app.config['SECRET_KEY'] is 'thisismykey')
 
 class TestTestingConfig(unittest.TestCase):
     def setUp(self):
@@ -16,6 +17,7 @@ class TestTestingConfig(unittest.TestCase):
     def test_app_is_testing(self):
         self.assertTrue(self.app.config['DEBUG'] is True)
         self.assertTrue(self.app.config['TESTING'] is True)
+        self.assertFalse(self.app.config['SECRET_KEY'] is 'thisismykey')
 
 class TestProductionConfig(unittest.TestCase):
     def setUp(self):

@@ -60,10 +60,13 @@ def registration():
         if reg_user.save_user():
             return make_response(jsonify(reg_user.save_user()), 409)
         else:
+            auth_token = reg_user.encode_auth_token(reg_user.id)
+
             return make_response(jsonify({
                 "status": 201,
                 "message": "{} registered successfully".format(data['email']),
-                "username": data['username']
+                "username": data['username'],
+                "token": auth_token.decode()
             }), 201)
 
 """ This route allows registered users to log in """
