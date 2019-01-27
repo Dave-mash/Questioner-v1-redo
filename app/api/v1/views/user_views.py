@@ -10,23 +10,6 @@ import uuid
 v1 = Blueprint('userv1', __name__, url_prefix='/api/v1/')
 
 
-def errorParser(duplicate, name):
-
-    def error(error):
-        return make_response(jsonify({
-            "status": 409,
-            "error": "This {} is already taken!".format(error)
-        }), 409)
-
-    if duplicate:
-        return error(name)
-
-
-def missing_fields(name):
-    return jsonify({
-        "error": "You missed the {} field".format(name)
-    }, 400)
-
 """ This route fetches all users """
 @v1.route("/users", methods=['GET'])
 def get():
@@ -42,41 +25,25 @@ def get():
 def registration():
     data = request.get_json()
 
-    fields = ['first_name', 'last_name', 'othername', 'email', 'phoneNumber', 'username', 'password', 'confirm_password']
-
-    for key in fields:
-        try:
-            data[key]
-        except:
-            return jsonify({
-                "error": 'You missed the {} key, value pair'.format(key)
-            })
-
-    users = User().fetch_users()
-    dup_email = [user for user in users if user['email'] == data['email']]
-    dup_username = [user for user in users if user['username'] == data['username']]
-
-    if dup_username:
-        return errorParser(dup_username[0]['username'], 'username')
-    elif dup_email:
-        return errorParser(dup_email[0]['email'], 'email')
+    if UserValidator().signup_fields(data):
+        return make_response(jsonify(UserValidator().signup_fields(data)), 400)
     else:
         # Validate user
-        validate_user = UserValidator(
-            data['first_name'],
-            data['last_name'],
-            data['username'],
-            data['email'],
-            data['password'],
-            data['confirm_password']
-        )
-        validate_user.data_exists()
-        validate_user.valid_email()
-        validate_user.valid_name()
-        validate_user.valid_phoneNumber(data['phoneNumber'])
-        validate_user.validate_password()
-        validate_user.matching_password()
+        validate_user = UserValidator(data)
+        validation_methods = [
+            validate_user.valid_email,
+            validate_user.valid_name,
+            validate_user.valid_phoneNumber,
+            validate_user.validate_password,
+            validate_user.matching_password
+        ]
 
+        for error in validation_methods:
+            if error():
+                return make_response(jsonify({
+                    "error": error()
+                }), 422)
+                
         # Register user
         user_data = {
             "first_name": data['first_name'],
@@ -89,18 +56,31 @@ def registration():
         }
 
         reg_user = User(user_data)
-        reg_user.save_user()
 
-        return make_response(jsonify({
-            "status": "ok",
-            "message": "{} registered successfully".format(data['email']),
-            "username": data['username']
-        }), 201)
+        if reg_user.save_user():
+            return make_response(jsonify(reg_user.save_user()), 409)
+        else:
+            return make_response(jsonify({
+                "status": 201,
+                "message": "{} registered successfully".format(data['email']),
+                "username": data['username']
+            }), 201)
 
 """ This route allows registered users to log in """
 @v1.route("/auth/login", methods=['POST'])
 def login():
     data = request.get_json()
+    missing_fields = UserValidator().login_fields(data)
+
+    if missing_fields:
+        return make_response(jsonify(missing_fields), 400)
+
+    validate_user = UserValidator(data)
+
+    if validate_user.valid_email():
+        return make_response(jsonify({
+            "error": validate_user.valid_email()
+        }), 422)
 
     credentials = {
         "email": data['email'],
@@ -108,12 +88,12 @@ def login():
     }
 
     if User().log_in_user(credentials):
-        return jsonify({
+        return make_response(jsonify({
             "status": 201,
             "message": "{} has been successfully logged in".format(data['email'])
-        }), 201
+        }), 201)
     else:
         return make_response(jsonify({
             "status": 401,
-            "error": "You entered wrong information. Please check your credentials!"
+            "error": "You entered wrong information. Please check your credentials or try creating an account first!"
         }), 401) # unauthorised

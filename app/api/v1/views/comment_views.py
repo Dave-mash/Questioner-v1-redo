@@ -14,24 +14,6 @@ from app.api.v1.models.comment import Comment
 v1 = Blueprint('commentv1', __name__, url_prefix='/api/v1/')
 
 
-def errorParser(meetup, question, comment):
-
-    def error(error):
-        return make_response(jsonify({
-            "status": 404,
-            "error": "No {} found!".format(error)
-        }))
-
-    if not meetup:
-        return error('meetup')
-
-    elif not question:
-        return error('question')
-
-    elif not comment:
-        return error('comment')
-
-
 """ This route posts a comment on a question """
 @v1.route("/<int:questionId>/comments", methods=['POST'])
 def comment_on_question(questionId):
@@ -98,7 +80,7 @@ def edit_comment(questionId, commentId, meetupId):
             "message": "Comment with id '{}' was updated".format(commentId)
         }), 200
     else:
-        return errorParser(meetup, question, comment)
+        return Comment().errorParser(meetup, question, comment)
 
 
 """ This route deletes a comment """
@@ -116,5 +98,5 @@ def delete_comment(questionId, commentId, meetupId):
             "message": "Comment with id '{}' was deleted".format(commentId)
         }), 200
     else:
-        return errorParser(meetup, question, comment)
+        return Comment().errorParser(meetup, question, comment)
 

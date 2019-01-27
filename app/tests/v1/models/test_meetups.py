@@ -17,7 +17,7 @@ class TestMeetup(unittest.TestCase):
             "id": 1,
             "location": 'Nairobi',
             "images": ['img1', 'img2'],
-            "topic": 'Python',
+            "title": 'Python',
             "happeningOn": '15/10/2019',
             "tags": ['Django', 'Flask'],
             "questions": []

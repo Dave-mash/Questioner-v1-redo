@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask import request, jsonify, make_response, Blueprint
 
 from app.api.v1.models.meetup import Meetup
+from app.api.v1.utils.meetup_validators import MeetupValidator
 
 v1 = Blueprint('meetupv1', __name__, url_prefix='/api/v1/')
 
@@ -21,18 +22,28 @@ def get_all_meetups():
 def post_a_meetup():
     data = request.get_json()
 
-    fields = ['topic', 'description', 'location', 'images', 'happeningOn', 'tags']
+    if MeetupValidator().meetup_fields(data):
+        return make_response(jsonify(MeetupValidator().meetup_fields(data)), 400)
+    else:
+        # Validate user
+        validate_question = MeetupValidator(data)
+        validation_methods = [
+            validate_question.valid_date,
+            validate_question.data_exists,
+            validate_question.valid_description,
+            validate_question.valid_location,
+            validate_question.valid_tags,
+            validate_question.valid_title
+        ]
 
-    for key in fields:
-        try:
-            data[key]
-        except:
-            return jsonify({
-                "error": 'You missed the {} key, value pair'.format(key)
-            })
-
+        for error in validation_methods:
+            if error():
+                return make_response(jsonify({
+                    "error": error()
+                }), 422)
+         
     meetup = {
-        "topic": data['topic'],
+        "title": data['title'],
         "description": data['description'],
         "location": data['location'],
         "images": data['images'],
@@ -48,7 +59,7 @@ def post_a_meetup():
         "status": 201,
         "message": "You have successfully posted a meetup",
         "data": [{
-            "topic": data['topic'],
+            "title": data['title'],
             "location": data['location'],
             "images": ["img1", "img2"],
             "happeningOn": data['happeningOn'],
@@ -84,7 +95,7 @@ def edit_meetup(meetupId):
     if meetup:
 
         updates = {
-            "topic": data['topic'],
+            "title": data['title'],
             "description": data['description'],
             "location": data['location'],
             "images": ["img1", "img2"],
@@ -95,7 +106,7 @@ def edit_meetup(meetupId):
         Meetup().edit_meetup(meetupId, updates)
         return jsonify({
             "status": 200,
-            "message": "{} was updated".format(meetup['topic'].upper())
+            "message": "{} was updated".format(meetup['title'].upper())
         }), 200
     else:
         return make_response(jsonify({
@@ -114,7 +125,7 @@ def delete_meetup(meetupId):
         Meetup().delete_meetup(meetupId)
         return jsonify({
             "status": 200,
-            "message": "{} was deleted".format(get_meetup['topic'].upper())
+            "message": "{} was deleted".format(get_meetup['title'].upper())
         }), 200
     else:
         return make_response(jsonify({
@@ -131,20 +142,20 @@ def post_RSVP(meetupId):
 
     if meetup:
         
-        topic = meetup[0]['topic'].upper()
+        title = meetup[0]['title'].upper()
         rsvp = {
             "meetup": meetupId,
-            "topic": topic,
+            "title": title,
             "status": data['status']
         }
 
         def confirm():
             if rsvp['status'] == "yes":
-                return "You have successfully RSVP'd on {} meetup".format(topic)
+                return "You have successfully RSVP'd on {} meetup".format(title)
             elif rsvp['status'] == "no":
-                return "You have confirmed you're not attending the {} meetup".format(topic)
+                return "You have confirmed you're not attending the {} meetup".format(title)
             elif rsvp['status'] == "maybe":
-                return "You have confirmed you might attend the {} meetup".format(topic)
+                return "You have confirmed you might attend the {} meetup".format(title)
 
         return jsonify({
             "status": 200,

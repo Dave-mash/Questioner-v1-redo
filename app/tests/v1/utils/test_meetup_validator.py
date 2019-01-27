@@ -10,16 +10,17 @@ class TestQuestionsValidator(unittest.TestCase):
     def setUp(self):
         """ Initializes app """
         self.meetup = {
-            "topic": "a meetup",
+            "title": "a meetup",
             "description": "this is a meetup",
             "tags": ['Django', 'Flask'],
+            "images": "[img1]",
             "happeningOn": "12-12-2019",
             "location": "Nairobi"
         }
 
     def test_meetup_data_exists(self):
         meetup = { **self.meetup }
-        meetup['topic'] = ''
+        meetup['title'] = ''
         meetup['description'] = ''
         question = MeetupValidator(meetup)
         self.assertEqual(question.data_exists(), 'You missed a required field')  
@@ -27,9 +28,9 @@ class TestQuestionsValidator(unittest.TestCase):
     def test_invalid_data(self):
 
         meetup = { **self.meetup }
-        meetup['topic'] = 'b'
+        meetup['title'] = 'b'
         question = MeetupValidator(meetup)
-        self.assertEqual(question.valid_topic(), 'Your topic is too short!')
+        self.assertEqual(question.valid_title(), 'Your title is too short!')
 
         meetup = { **self.meetup }
         meetup['description'] = 'T'
@@ -44,7 +45,7 @@ class TestQuestionsValidator(unittest.TestCase):
         meetup = { **self.meetup }
         meetup['happeningOn'] = '12/12/2019'
         question = MeetupValidator(meetup)
-        self.assertEqual(question.valid_date(), 'Date format should be YYYY-MM-DD')
+        self.assertEqual(question.valid_date(), 'Date format should be DD-MM-YYYY')
 
         meetup = { **self.meetup }
         meetup['location'] = 'N'

@@ -26,7 +26,7 @@ class User(BaseModel):
             self.rsvps = []
 
     def save_user(self):
-
+        users = self.fetch_users()
         user_item = {
             "id": self.id,
             "dateRegistered": self.createdOn,
@@ -41,7 +41,23 @@ class User(BaseModel):
             "rsvps": self.rsvps
         }
 
-        self.base_model.add_item(user_item)
+        try:
+            for user in users:
+                email = user['email'] == self.email
+                username = user['username'] == self.username
+                if email:    
+                    return {
+                        "error": "This email is already taken!",
+                        "status": 409
+                    }
+                elif username:
+                    return {
+                        "error": "This username is already taken!",
+                        "status": 409
+                    }
+            self.base_model.add_item(user_item)
+        except:
+            self.base_model.add_item(user_item)
 
     def fetch_users(self):
 
@@ -52,13 +68,16 @@ class User(BaseModel):
 
         # Check if user details exists
         users = self.fetch_users()
-        email = [email for email in users if email['email'] == details['email']]
-        password = [p_word for p_word in users if p_word['password'] == details['password']]
+        try:
+            email = [email for email in users if email['email'] == details['email']]
+            password = [p_word for p_word in users if p_word['password'] == details['password']]
 
-        if email and password:
-            return True
-        else:
-            return False
+            if email and password:
+                return True
+            else:
+                return False
+        except:
+            return users
 
     def fetch_specific_user(self, id):
 

@@ -20,6 +20,20 @@ class Comment(BaseModel):
             self.body = comment['body']
             self.comment = comment['comment']
 
+    def errorParser(self, meetup, question, comment):
+
+        def error(error):
+            return { "error": "No {} found!".format(error) }
+
+        if not meetup:
+            return error('meetup')
+
+        elif not question:
+            return error('question')
+
+        elif not comment:
+            return error('comment')
+
     def save_comment(self):
 
         comment_item = {

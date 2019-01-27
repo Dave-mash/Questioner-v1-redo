@@ -6,8 +6,6 @@ from app import create_app
 
 class TestMeetup(unittest.TestCase):
 
-    db = []
-
     def setUp(self):
         """ Initializes app"""
 
@@ -18,15 +16,13 @@ class TestMeetup(unittest.TestCase):
             "location" : "Nairobi",
             "tags": ["Machine learning", "Neural networks"],
             "images": ["img1", "img2"],
-            "topic": "Python data structures",
+            "title": "Python data structures",
             "description": "Deep dive into python",
         }
 
     def post_req(self, path='api/v1/meetups', data={}):
         """ This function utilizes the test client to send POST requests """
         data = data if data else self.meetup
-        data['id'] = len(self.db)
-        self.db.append(data)
         res = self.client.post(
             path,
             data=json.dumps(data),
@@ -69,6 +65,12 @@ class TestMeetup(unittest.TestCase):
         payload2 = self.get_req('api/v1/meetups/1')
         self.assertEqual(payload2.status_code, 200)
         self.assertEqual(payload2.json['status'], 200)
+
+    def test_edit_meetup(self):
+        """ Test that a user can edit a meetup """
+        payload = self.client.patch('api/v1/meetups/6')
+        self.assertEqual(payload.status_code, 404)
+        self.assertEqual(payload.json['error'], 'meetup not found!')
 
     def test_delete_meetup(self):
         """ Test that a user can delete a meetup """

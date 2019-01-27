@@ -18,7 +18,7 @@ class Meetup(BaseModel):
             self.createdOn = datetime.now()
             self.location = meetup['location']
             self.images = meetup['images']
-            self.topic = meetup['topic']
+            self.title = meetup['title']
             self.happeningOn = meetup['happeningOn']
             self.tags = meetup['tags']
 
@@ -29,7 +29,7 @@ class Meetup(BaseModel):
             "createdOn": self.createdOn,
             "location": self.location,
             "images": self.images,
-            "topic": self.topic,
+            "title": self.title,
             "happeningOn": self.happeningOn,
             "tags": self.tags,
         }

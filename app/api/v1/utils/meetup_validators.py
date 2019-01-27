@@ -6,23 +6,37 @@ from datetime import datetime
 
 class MeetupValidator:
 
-    def __init__(self, meetupObj={}):
-        self.title = meetupObj['topic']
-        self.tags = meetupObj['tags']
-        self.happeningOn = meetupObj['happeningOn']
-        self.description = meetupObj['description']
-        self.location = meetupObj['location']
-        self.meetupObj = meetupObj
+    def __init__(self, meetup={}):
+        if meetup:
+            self.title = meetup['title']
+            self.description = meetup['description']
+            self.location = meetup['location']
+            self.images = meetup['images']
+            self.happeningOn = meetup['happeningOn']
+            self.tags = meetup['tags']
+            self.meetup = meetup
+
+    def meetup_fields(self, data):
+        fields = ['title', 'description', 'location', 'images', 'happeningOn', 'tags']
+    
+        for key in fields:
+            try:
+                data[key]
+            except:
+                return {
+                    "error": 'You missed the {} key, value pair'.format(key),
+                    "status": 400
+                }
 
     def data_exists(self):
         if not self.title or not self.happeningOn or not self.description or not self.location:
             return 'You missed a required field'
 
-    def valid_topic(self):
+    def valid_title(self):
         if len(self.title) < 3:
-            return 'Your topic is too short!'
+            return 'Your title is too short!'
         elif len(self.title) > 30:
-            return 'Your topic is too long!'
+            return 'Your title is too long!'
 
     def valid_description(self):
         if len(self.description) < 5:
@@ -36,7 +50,7 @@ class MeetupValidator:
         try:
             datetime.strptime(self.happeningOn, '%d-%m-%Y')
         except:
-            return 'Date format should be YYYY-MM-DD'
+            return 'Date format should be DD-MM-YYYY'
 
     def valid_location(self):
         if len(self.location) < 3:

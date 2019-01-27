@@ -3,11 +3,11 @@ This module sets up all the question endpoints
 Author: Dave
 """
 
-from flask import Blueprint
 from flask import request, jsonify, make_response, Blueprint
 
 from app.api.v1.models.question import Question
 from app.api.v1.models.meetup import Meetup
+from app.api.v1.utils.question_validators import QuestionValidator
 
 v1 = Blueprint('questionv1', __name__, url_prefix='/api/v1/')
 
@@ -16,45 +16,51 @@ v1 = Blueprint('questionv1', __name__, url_prefix='/api/v1/')
 @v1.route("/<int:meetupId>/questions", methods=['POST'])
 def post_a_question(meetupId):
     data = request.get_json()
-
-    fields = ['title', 'body']
-
-    for key in fields:
-        try:
-            data[key]
-        except:
-            return jsonify({
-                "error": 'You missed the {} key, value pair'.format(key)
-            })
-
-    meetups = Meetup().fetch_meetups()
-    meetup = [meetup for meetup in meetups if meetup['id'] == meetupId]
-
-    question = {
-        "title": data['title'],
-        "body": data['body'],
-        "meetupId": meetupId
-    }
     
-    question_model = Question(question)
-
-    question_model.save_question()
-    
-    if meetup:
-        return make_response(jsonify({
-            "status": 201,
-            "message": "You have successfully posted a question",
-            "data": [{
-                "title": data['title'],
-                "body": data['body'],
-                "meetup": meetupId
-            }]
-        }), 201)
+    if QuestionValidator().question_fields(data):
+        return make_response(jsonify(QuestionValidator().question_fields(data)), 400)
     else:
-        return make_response(jsonify({
-            "error": "Meetup not found or does not exist",
-            "status": 404
-        }), 404)
+        # Validate user
+        validate_question = QuestionValidator(data)
+        validation_methods = [
+            validate_question.valid_que,
+            validate_question.data_exists
+        ]
+
+        for error in validation_methods:
+            if error():
+                return make_response(jsonify({
+                    "error": error()
+                }), 422)
+            
+        meetups = Meetup().fetch_meetups()
+        meetup = [meetup for meetup in meetups if meetup['id'] == meetupId]
+
+        question = {
+            "title": data['title'],
+            "body": data['body'],
+            "meetupId": meetupId
+        }
+        
+        question_model = Question(question)
+
+        question_model.save_question()
+        
+        if meetup:
+            return make_response(jsonify({
+                "status": 201,
+                "message": "You have successfully posted a question",
+                "data": [{
+                    "title": data['title'],
+                    "body": data['body'],
+                    "meetup": meetupId
+                }]
+            }), 201)
+        else:
+            return make_response(jsonify({
+                "error": "Meetup not found or does not exist",
+                "status": 404
+            }), 404)
 
 
 """ This route displays a meetup's questions """

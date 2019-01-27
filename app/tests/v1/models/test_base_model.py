@@ -17,7 +17,17 @@ class TestBaseModel(unittest.TestCase):
         self.comments = BaseModel('comment_db')
 
         self.meetup_item = {"content": 'item', "id": 1}
-        self.user_item = {"question": 'a question', "id": 1}
+        self.user_item = {
+            "id": 20,
+            "first_name" : "David",
+            "last_name" : "Mwangi",
+            "othername" : "Dave",
+            "email" : "jjj@demo.com",
+            "phoneNumber" : "+254729710290",
+            "username" : "jjj",
+            "password": "abc123@1A",
+            "confirm_password": "abc123@1A"
+        }
         self.question_item = {"name": 'dave', "id": 1}
 
     def test_check_db(self):
@@ -106,7 +116,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertFalse(self.questions.db)
 
         # test users list
-        self.users.delete_item(1)
+        self.users.delete_item(20)
         self.assertFalse(self.users.db)
     
     def tearDown(self):
