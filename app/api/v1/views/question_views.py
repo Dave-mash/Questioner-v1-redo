@@ -8,12 +8,14 @@ from flask import request, jsonify, make_response, Blueprint
 from app.api.v1.models.question import Question
 from app.api.v1.models.meetup import Meetup
 from app.api.v1.utils.question_validators import QuestionValidator
+from app.api.v1.models.base_model import AuthenticationRequired
 
 v1 = Blueprint('questionv1', __name__, url_prefix='/api/v1/')
 
 
 """ This route posts a question """
 @v1.route("/<int:meetupId>/questions", methods=['POST'])
+@AuthenticationRequired
 def post_a_question(meetupId):
     data = request.get_json()
     
@@ -83,6 +85,7 @@ def meetup_questions(meetupId):
 
 """ This route upvotes a question """
 @v1.route("/questions/<int:questionId>/upvote", methods=['PATCH'])
+@AuthenticationRequired
 def upvote_question(questionId):
 
     questions = Question().fetch_questions()
@@ -108,6 +111,7 @@ def upvote_question(questionId):
 
 """ This route downvotes a question """
 @v1.route("/questions/<int:questionId>/downvote", methods=['PATCH'])
+@AuthenticationRequired
 def downvote_question(questionId):
 
     questions = Question().fetch_questions()
@@ -133,6 +137,7 @@ def downvote_question(questionId):
 
 """ This route edits a question """
 @v1.route("questions/<int:questionId>", methods=['PATCH'])
+@AuthenticationRequired
 def edit_question(questionId):
     data = request.get_json()
 
@@ -159,6 +164,7 @@ def edit_question(questionId):
 
 """ This route deletes a question """
 @v1.route("questions/<int:questionId>", methods=['DELETE'])
+@AuthenticationRequired
 def delete_question(questionId):
 
     question = Question().fetch_specific_question(questionId)

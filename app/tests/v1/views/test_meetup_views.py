@@ -1,10 +1,35 @@
 import unittest
 import datetime
+from random import choice, randint
 import json
+import string
 
 from app import create_app
 
 class TestMeetup(unittest.TestCase):
+
+    def create_user(self):
+        """ simulate a fake user """
+        username = "".join(choice(
+                           string.ascii_letters) for x in range(randint(7, 10)))
+        params = {
+            "first_name": "Dave",
+            "last_name": "mwas",
+            "othername" : "mash",
+            "email": "{}@gmail.com".format(username),
+            "username": username,
+            "phoneNumber" : "+254729710290",
+            "password": "abc123@1A",
+            "confirm_password": "abc123@1A"
+        }
+        
+        res = self.client.post("/api/v1/auth/signup",
+                                data=json.dumps(params),
+                                content_type="application/json")
+
+        user_id = res.json['user_id']
+        auth_token = res.json['auth_token']
+        return user_id, auth_token
 
     def setUp(self):
         """ Initializes app"""
@@ -20,12 +45,19 @@ class TestMeetup(unittest.TestCase):
             "description": "Deep dive into python",
         }
 
-    def post_req(self, path='api/v1/meetups', data={}):
+    def post_req(self, path='api/v1/meetups', auth_token=1, data={}, headers=None):
         """ This function utilizes the test client to send POST requests """
         data = data if data else self.meetup
+        if auth_token is 1:
+            user = self.create_user()
+            auth_token = user[1]
+        if not headers:
+            headers = {"Authorization": "Bearer {}".format(auth_token)}
+
         res = self.client.post(
             path,
             data=json.dumps(data),
+            headers=headers,
             content_type='application/json'
         )
         return res

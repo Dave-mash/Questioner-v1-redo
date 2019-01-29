@@ -10,12 +10,14 @@ from flask import request, jsonify, make_response, Blueprint
 from app.api.v1.models.question import Question
 from app.api.v1.models.meetup import Meetup
 from app.api.v1.models.comment import Comment
+from app.api.v1.models.base_model import AuthenticationRequired
 
 v1 = Blueprint('commentv1', __name__, url_prefix='/api/v1/')
 
 
 """ This route posts a comment on a question """
 @v1.route("/<int:questionId>/comments", methods=['POST'])
+@AuthenticationRequired
 def comment_on_question(questionId):
     data = request.get_json()
 
@@ -61,6 +63,7 @@ def comment_on_question(questionId):
 
 """ This route edits a comment """
 @v1.route("/<int:meetupId>/<int:questionId>/<int:commentId>", methods=['PATCH'])
+@AuthenticationRequired
 def edit_comment(questionId, commentId, meetupId):
     data = request.get_json()
 
@@ -85,6 +88,7 @@ def edit_comment(questionId, commentId, meetupId):
 
 """ This route deletes a comment """
 @v1.route("/<int:meetupId>/<int:questionId>/<int:commentId>", methods=['DELETE'])
+@AuthenticationRequired
 def delete_comment(questionId, commentId, meetupId):
 
     meetup = Meetup().fetch_specific_meetup(meetupId)

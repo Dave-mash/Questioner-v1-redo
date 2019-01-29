@@ -2,7 +2,9 @@
 This module sets up the question model and all it's functionality
 """
 
+import uuid
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.api.v1.models.base_model import BaseModel
 
@@ -21,7 +23,7 @@ class User(BaseModel):
             self.email = user['email']
             self.phoneNumber = user['phoneNumber']
             self.username = user['username']
-            self.password = user['password']
+            self.password = generate_password_hash(user['password'])
             self.isAdmin = False
             self.rsvps = []
 
@@ -66,18 +68,19 @@ class User(BaseModel):
     # Log in user
     def log_in_user(self, details):
 
-        # Check if user details exists
-        users = self.fetch_users()
         try:
+            # Check if user details exists
+            users = self.fetch_users()
+            
             email = [email for email in users if email['email'] == details['email']]
-            password = [p_word for p_word in users if p_word['password'] == details['password']]
+            password = [p_word for p_word in users if check_password_hash(p_word['password'], details['password'])]
 
             if email and password:
-                return True
+                return str(uuid.uuid1())
             else:
                 return False
         except:
-            return users
+            return None
 
     def fetch_specific_user(self, id):
 

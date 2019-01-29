@@ -60,6 +60,7 @@ class TestUser(unittest.TestCase):
         }
         payload = self.post_req(data=user)
         self.assertEqual(payload.json['status'], 201)
+        self.assertTrue(payload.json['auth_token'])
         self.assertEqual(payload.json['message'], "josh@email.com registered successfully")
 
         # test missing fields
@@ -87,16 +88,16 @@ class TestUser(unittest.TestCase):
     def test_log_in_user(self):
         """ This method tests that the log in user route works correctly """
 
-        # test for non-existing account
+        # test successful log in
         user = {
             "email": self.user_item['email'],
             "password": self.user_item['password']
         }
 
-        # test successful log in
-        user3 = { **user }
-        payload4 = self.post_req(path='api/v1/auth/login', data=user3)
+        payload4 = self.post_req(path='api/v1/auth/login', data=user)
+
         self.assertEqual(payload4.status_code, 201)
+        self.assertTrue(payload4.json['auth_token'])
         self.assertEqual(payload4.json['message'], "jjj@demo.com has been successfully logged in")
 
         user4 = {

@@ -1,11 +1,11 @@
 """
 This module defines all the user endpoints
 """
-
+import json
 from flask import request, jsonify, make_response, Blueprint
+
 from app.api.v1.models.user import User
 from app.api.v1.utils.user_validators import UserValidator
-import uuid
 
 v1 = Blueprint('userv1', __name__, url_prefix='/api/v1/')
 
@@ -66,9 +66,10 @@ def registration():
                 "status": 201,
                 "message": "{} registered successfully".format(data['email']),
                 "username": data['username'],
-                "token": auth_token.decode()
+                "user_id": reg_user.id,
+                "auth_token": auth_token.decode('utf-8')
             }), 201)
-
+    
 """ This route allows registered users to log in """
 @v1.route("/auth/login", methods=['POST'])
 def login():
@@ -90,9 +91,14 @@ def login():
         "password": data['password']
     }
 
-    if User().log_in_user(credentials):
+    # if auth:
+    log_user = User().log_in_user(credentials)
+
+    if log_user:
+        auth_token = User().encode_auth_token(log_user)
         return make_response(jsonify({
             "status": 201,
+            "auth_token": auth_token.decode('utf-8'),
             "message": "{} has been successfully logged in".format(data['email'])
         }), 201)
     else:

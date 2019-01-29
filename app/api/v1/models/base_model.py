@@ -5,6 +5,8 @@ This module serves as a database mock-up for the project
 import os
 import jwt
 import datetime
+from functools import wraps, update_wrapper
+from flask import jsonify, request
 
 meetups_list = []
 questions_list = []
@@ -31,7 +33,7 @@ class BaseModel:
 
         try:
             payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=60),
                 'iat': datetime.datetime.utcnow(),
                 'sub': user_id
             }
@@ -94,3 +96,20 @@ class BaseModel:
             edit_item[0].update(updates)
         else: 
             return "No item"
+
+class AuthenticationRequired:
+    """ This decorator class defines the token authentication """
+
+    def __init__(self, f):
+        self.f = f
+        update_wrapper(self, f)
+
+    def __call__(self, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or len(auth_header) < 8 or " " not in auth_header:
+            return jsonify({ "error": "Please log in first!" }), 403
+
+        auth_token = auth_header.split(" ")[1]
+        BaseModel().decode_auth_token(auth_token)
+
+        return self.f(*args, **kwargs)

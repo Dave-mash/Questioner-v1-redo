@@ -1,11 +1,13 @@
 from flask import Blueprint
 from flask import request, jsonify, make_response, Blueprint
+from functools import wraps
 
 from app.api.v1.models.meetup import Meetup
+from app.api.v1.models.user import User
 from app.api.v1.utils.meetup_validators import MeetupValidator
+from app.api.v1.models.base_model import AuthenticationRequired
 
 v1 = Blueprint('meetupv1', __name__, url_prefix='/api/v1/')
-
 
 """ This route performs a get request to fetch all upcoming meetups """
 @v1.route("/meetups/upcoming", methods=['GET'])
@@ -19,8 +21,11 @@ def get_all_meetups():
 
 """ This route posts a meetup """
 @v1.route("/meetups", methods=['POST'])
+@AuthenticationRequired
 def post_a_meetup():
     data = request.get_json()
+    auth_header = request.headers
+    print(auth_header)
 
     if MeetupValidator().meetup_fields(data):
         return make_response(jsonify(MeetupValidator().meetup_fields(data)), 400)
@@ -39,7 +44,8 @@ def post_a_meetup():
         for error in validation_methods:
             if error():
                 return make_response(jsonify({
-                    "error": error()
+                    "error": error(),
+                    "status": 422
                 }), 422)
          
     meetup = {
@@ -87,6 +93,7 @@ def get_meetup(meetupId):
 
 """ This route edits a meetup """
 @v1.route("meetups/<int:meetupId>", methods=['PATCH'])
+@AuthenticationRequired
 def edit_meetup(meetupId):
     data = request.get_json()
 
@@ -117,6 +124,7 @@ def edit_meetup(meetupId):
 
 """ This route deletes a specific meetup """
 @v1.route("admin/meetups/<int:meetupId>", methods=['DELETE'])
+@AuthenticationRequired
 def delete_meetup(meetupId):
 
     get_meetup = Meetup().fetch_specific_meetup(meetupId)
@@ -135,6 +143,7 @@ def delete_meetup(meetupId):
 
 """ This route posts RSVPS on meetups """
 @v1.route("/meetups/<int:meetupId>/rsvp", methods=['POST'])
+@AuthenticationRequired
 def post_RSVP(meetupId):
     data = request.get_json()
     meetups = Meetup().fetch_meetups()

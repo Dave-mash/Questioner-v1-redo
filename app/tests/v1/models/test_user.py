@@ -67,7 +67,6 @@ class TestUser(unittest.TestCase):
             "email": self.user_item['email'],
             "password": self.user_item['password']
         }
-        self.user.save_user()
         self.assertTrue(self.user.log_in_user(user2))
 
     def test_edit_user(self):
