@@ -3,6 +3,7 @@ This module sets up tests for the user model
 """
 
 import unittest
+from werkzeug.security import check_password_hash
 
 from app.api.v1.models.user import User
 
@@ -26,7 +27,7 @@ class TestUser(unittest.TestCase):
     def test_save_user(self):
         self.user.save_user()
         self.assertEqual(self.user.fetch_users()[1]['email'], self.user_item['email'])
-        self.assertEqual(self.user.fetch_users()[1]['password'], self.user_item['password'])
+        self.assertTrue(check_password_hash(self.user.fetch_users()[1]['password'], self.user_item['password']))
 
     def test_fetch_users(self):
         self.assertTrue(self.user.fetch_users())
@@ -34,7 +35,7 @@ class TestUser(unittest.TestCase):
     def test_specific_user(self):
 
         self.assertEqual(self.user.fetch_specific_user(1)['email'], self.user_item['email'])
-        self.assertEqual(self.user.fetch_specific_user(1)['password'], self.user_item['password'])
+        self.assertTrue(check_password_hash(self.user.fetch_specific_user(1)['password'], self.user_item['password']))
 
     def test_existing_user(self):
         user_item = { **self.user_item }

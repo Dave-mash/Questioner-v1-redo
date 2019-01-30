@@ -71,7 +71,7 @@ class TestMeetup(unittest.TestCase):
     def test_create_meetup_with_valid_data(self):
         """ Test that a user can create a meetup """
     
-        payload = self.post_req(data=self.meetup)
+        payload = self.post_req()
         self.assertEqual(payload.status_code, 201)
         self.assertEqual(payload.json['message'], "You have successfully posted a meetup")
         self.assertEqual(payload.json['status'], 201)
@@ -100,21 +100,30 @@ class TestMeetup(unittest.TestCase):
 
     def test_edit_meetup(self):
         """ Test that a user can edit a meetup """
-        payload = self.client.patch('api/v1/meetups/6')
+        
+        user = self.create_user()
+        auth_token = user[1]
+        headers = {"Authorization": "Bearer {}".format(auth_token)}
+
+        payload = self.client.patch('api/v1/meetups/6', headers=headers)
         self.assertEqual(payload.status_code, 404)
         self.assertEqual(payload.json['error'], 'meetup not found!')
 
     def test_delete_meetup(self):
         """ Test that a user can delete a meetup """
 
+        user = self.create_user()
+        auth_token = user[1]
+        headers = {"Authorization": "Bearer {}".format(auth_token)}
+
         # test for non-existing meetup
-        payload = self.client.delete('api/v1/admin/meetups/6')
+        payload = self.client.delete('api/v1/admin/meetups/6', headers=headers)
         self.assertEqual(payload.status_code, 404)
         self.assertEqual(payload.json['error'], 'Meetup not found!')
 
         # test existing meetup
         self.post_req(data=self.meetup)
-        payload2 = self.client.delete('api/v1/admin/meetups/2')
+        payload2 = self.client.delete('api/v1/admin/meetups/2', headers=headers)
         msg = "Python".upper()
         self.assertEqual(payload2.json['status'], 200)
         self.assertEqual(payload2.json['message'], "{} was deleted".format(msg))
