@@ -102,11 +102,11 @@ class BaseModel:
         )
 
        
-    def edit_item(self, col, id):
-        """ This method defines the edit item query """
+    def update_item(self, col, id):
+        """ This method defines the update item query """
 
         return database.update(
-            "UPDATE {} SET {} WHERE {} = {}".format(self.table_name, col, 'id', id)
+            "UPDATE {} SET {} WHERE id = {}".format(self.table_name, col, id)
         )
 
 

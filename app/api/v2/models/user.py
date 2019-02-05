@@ -26,6 +26,7 @@ class User(BaseModel):
             self.isAdmin = False
             self.rsvps = []
 
+
     def save_user(self):
         """ This method saves a non-existing user """
 
@@ -71,6 +72,7 @@ class User(BaseModel):
 
         return self.base_model.grab_items_by_name(cols, condition, item)
         
+
     # Log in user
     def log_in_user(self, details):
 
@@ -88,21 +90,37 @@ class User(BaseModel):
         except:
             return None
 
-    def edit_user(self, id, udpates):
-        """ This method defines the update query """
-
-        self.base_model.edit_item(id, udpates)
 
     def delete_user(self, id):
         """ This method defines the delete query """
 
-        try:
-            if self.fetch_specific_user('id', 'id', id):
-                return self.base_model.delete_item('id', id)
-        except:
+        if self.fetch_specific_user('id', 'id', id):
+            return self.base_model.delete_item('id', id)
+        else:
             return {
                 "error": "User not found or does not exist!"
             }
+
+
+    def update_user(self, id, updates):
+        """ This method defines the update query """
+
+        pairs_dict = {
+            "first_name": f"first_name = '{updates['first_name']}'",
+            "last_name": f"last_name = '{updates['last_name']}'",
+            "other_name": f"other_name = '{updates['othername']}'",
+            "email": f"email = '{updates['email']}'",
+            "phoneNumber": f"phone_number = '{updates['phoneNumber']}'",
+            "username": f"username = '{updates['username']}'",
+            "password": f"password = '{generate_password_hash(updates['password'])}'"
+        }
         
-    def update_user(self, id):
-        pass
+        pairs = ", ".join(pairs_dict.values())
+        print(pairs)
+
+        if self.fetch_specific_user('id', 'id', id):
+            return self.base_model.update_item(pairs, id)
+        else:
+            return {
+                "error": "User not found or does not exist!"
+            }

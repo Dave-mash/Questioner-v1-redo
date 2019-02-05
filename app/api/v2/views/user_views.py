@@ -105,17 +105,37 @@ def login():
             "error": "You entered wrong information. Please check your credentials or try creating an account first!"
         }), 401) # unauthorised
 
-""" This route allows a users to delete their account """
+""" This route allows a user to delete their account """
 @v2.route("/profile/<int:userId>", methods=['DELETE'])
 def del_account(userId):
 
     remove_user = User().delete_user(userId)
     if isinstance(remove_user, dict):
-        return make_response(jsonify({
-            "error": remove_user
-        }))
+        return make_response(jsonify(remove_user))
     else:
         return make_response(jsonify({
-            "message": f"user {userId} deleted successfully"
+            "message": f"user with id '{userId}' deleted successfully"
         }))
 
+""" This route allows a user to update their account """
+@v2.route("/profile/<int:userId>", methods=['PUT'])
+def update_account(userId):
+    data = request.get_json()
+
+    user_data = {
+        "first_name": data['first_name'],
+        "last_name": data['last_name'],
+        "othername": data['othername'],
+        "email": data['email'],
+        "phoneNumber": data['phoneNumber'],
+        "username": data['username'],
+        "password": data['password']
+    }    
+
+    update_user = User().update_user(userId, user_data)
+    if isinstance(update_user, dict):
+        return make_response(jsonify(update_user))
+    else:
+        return make_response(jsonify({
+            "message": f"user {user_data['email']} updated successfully"
+        }))

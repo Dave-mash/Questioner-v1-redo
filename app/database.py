@@ -90,7 +90,7 @@ class InitializeDb:
     
     def update(self, query):
         """ This method executes update queries """
-
+        print(query)
         self.cursor.execute(query)
         self.connection.commit()
 
