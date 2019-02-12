@@ -10,24 +10,14 @@ from flask import jsonify, request
 
 from app import create_app
 from app.database import InitializeDb
-database = InitializeDb(os.getenv('FLASK_DATABASE_URI'))
-
-meetups_list = []
-questions_list = []
-users_list = []
-comments_list = []
 
 class BaseModel:
     """ This class defines all the methods reusable in all the models """
 
-    def __init__(self, table_name=''):
+    def __init__(self, table_name='', database=os.getenv('FLASK_DATABASE_URI')):
 
         self.table_name = table_name
-        self.db = None
-        self.meetups_list = meetups_list
-        self.questions_list = questions_list
-        self.users_list = users_list
-        self.comments_list = comments_list
+        self.database = InitializeDb(database)
 
 
     @staticmethod
@@ -70,48 +60,64 @@ class BaseModel:
             return 'Invalid token. Please log in again.'
 
 
-    def grab_all_items(self, cols, condition, value):
+    def grab_all_items(self, cols, condition):
         """ This method fetches all items """
 
-        return database.fetch_all(
-            "SELECT {} FROM {} WHERE {} = {};".format(self.table_name, cols, condition, value)
+        return self.database.fetch_all(
+            "SELECT {} FROM {} WHERE {};".format(cols, self.table_name, condition)
         )
 
 
-    def grab_items_by_name(self, column, col_name, item_name):
+    def grab_items_by_name(self, column, condition):
         """ This method fetches an item by name """
+        
+        return self.database.fetch_one(
+            "SELECT {} FROM {} WHERE {}".format(column, self.table_name, condition)
+        )
 
-        return database.fetch_one(
-            "SELECT {} FROM {} WHERE {} = '{}'".format(column, self.table_name, col_name, item_name)
+
+    def grab_items(self, columns, name, condition):
+        """ This method fetches items """
+
+        return self.database.fetch_all(
+            "SELECT {} FROM {} WHERE {}".format(columns, name, condition)
         )
 
 
     def add_item(self, keys, values):
         """ This method adds an item """
 
-        return database.execute(
+        return self.database.execute(
             "INSERT INTO {} ({}) VALUES {};".format(self.table_name, keys, values)
         )
 
 
-    def delete_item(self, col, id):
+    def add_item_two(self, name, keys, values):
+        """ This method adds an item """
+
+        return self.database.execute(
+            "INSERT INTO {} ({}) VALUES {};".format(name, keys, values)
+        )
+
+
+    def delete_item(self, condition):
         """ This method defines the delete item query """
         
-        return database.update(
-            "DELETE FROM {} WHERE {} = {}".format(self.table_name, col, id)
+        return self.database.update(
+            "DELETE FROM {} WHERE {}".format(self.table_name, condition)
         )
 
        
-    def update_item(self, col, id):
+    def update_item(self, updates, condition):
         """ This method defines the update item query """
 
-        return database.update(
-            "UPDATE {} SET {} WHERE id = {}".format(self.table_name, col, id)
+        return self.database.update(
+            "UPDATE {} SET {} WHERE {}".format(self.table_name, updates, condition)
         )
 
 
 class AuthenticationRequired:
-    """ This decorator class defines the token authentication """
+    """ This decorator class validates the token """
 
     def __init__(self, f):
         self.f = f
@@ -119,10 +125,13 @@ class AuthenticationRequired:
 
     def __call__(self, *args, **kwargs):
         auth_header = request.headers.get('Authorization')
+
         if not auth_header or len(auth_header) < 8 or " " not in auth_header:
             return jsonify({ "error": "Please log in first!" }), 403
 
         auth_token = auth_header.split(" ")[1]
-        BaseModel().decode_auth_token(auth_token)
 
+        if isinstance(BaseModel().decode_auth_token(auth_token), str):
+            return jsonify({ "error": BaseModel().decode_auth_token(auth_token) })
+        
         return self.f(*args, **kwargs)

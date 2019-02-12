@@ -29,7 +29,7 @@ class BaseModel:
         """ This method generates authentication token """
         from app import create_app
 
-        app = create_app('development')
+        app, database = create_app()
 
         try:
             payload = {
@@ -52,7 +52,7 @@ class BaseModel:
     def decode_auth_token(auth_token):
         """ This method takes in token and decodes it """
         from app import create_app
-        app = create_app('development')
+        app, database = create_app()
 
         try:
             payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))

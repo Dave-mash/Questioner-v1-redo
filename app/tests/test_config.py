@@ -4,7 +4,7 @@ from app import create_app
 
 class TestDevelopmentConfig(unittest.TestCase):
     def setUp(self):
-        self.app = create_app('development')
+        self.app = create_app('development')[0]
 
     def test_app_is_development(self):
         self.assertTrue(self.app.config['DEBUG'] is True)
@@ -12,7 +12,7 @@ class TestDevelopmentConfig(unittest.TestCase):
 
 class TestTestingConfig(unittest.TestCase):
     def setUp(self):
-        self.app = create_app('testing')
+        self.app = create_app('testing')[0]
 
     def test_app_is_testing(self):
         self.assertTrue(self.app.config['DEBUG'] is True)
@@ -21,7 +21,7 @@ class TestTestingConfig(unittest.TestCase):
 
 class TestProductionConfig(unittest.TestCase):
     def setUp(self):
-        self.app = create_app('production')
+        self.app = create_app('production')[0]
 
     def test_is_production(self):
         self.assertTrue(self.app.config['DEBUG'] is False)

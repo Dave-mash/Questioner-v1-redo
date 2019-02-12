@@ -15,7 +15,7 @@ class TestQuestion(unittest.TestCase):
     def setUp(self):
         """ Initializes app"""
 
-        self.app = create_app('testing')
+        self.app = create_app('testing')[0]
         self.client = self.app.test_client()
         self.question = {
             "title": "Python",

@@ -34,7 +34,7 @@ class TestMeetup(unittest.TestCase):
     def setUp(self):
         """ Initializes app"""
 
-        self.app = create_app('testing')
+        self.app = create_app('testing')[0]
         self.client = self.app.test_client()
         self.meetup = {
             "happeningOn" : "12-12-2018",

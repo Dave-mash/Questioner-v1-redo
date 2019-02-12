@@ -10,15 +10,19 @@ from app.api.v2.utils.user_validators import UserValidator
 v2 = Blueprint('userv2', __name__, url_prefix='/api/v2/')
 
 
-# """ This route fetches all users """
-# @v2.route("/users", methods=['GET'])
-# def get():
-#     users = User().fetch_users()
+""" This route fetches all users """
+@v2.route("/users", methods=['GET'])
+def get():
+    users = User().fetch_all_users()
+    users_list = []
 
-#     return make_response(jsonify({
-#         "status": 200,
-#         "users": users
-#     }), 200)
+    for user in users:
+        users_list.append(user[0])
+
+    return make_response(jsonify({
+        "status": 200,
+        "users": users_list
+    }), 200)
 
 """ This route allows unregistered users to sign up """
 @v2.route("/auth/signup", methods=['POST'])
@@ -92,7 +96,7 @@ def login():
     # if auth:
     log_user = User().log_in_user(credentials)
 
-    if log_user:
+    if isinstance(log_user, int):
         auth_token = User().encode_auth_token(log_user)
         return make_response(jsonify({
             "status": 201,
@@ -100,10 +104,8 @@ def login():
             "message": "{} has been successfully logged in".format(data['email'])
         }), 201)
     else:
-        return make_response(jsonify({
-            "status": 401,
-            "error": "You entered wrong information. Please check your credentials or try creating an account first!"
-        }), 401) # unauthorised
+        return make_response(log_user)
+
 
 """ This route allows a user to delete their account """
 @v2.route("/profile/<int:userId>", methods=['DELETE'])
@@ -122,6 +124,25 @@ def del_account(userId):
 def update_account(userId):
     data = request.get_json()
 
+    if UserValidator().signup_fields(data):
+        return make_response(jsonify(UserValidator().signup_fields(data)), 400)
+    else:
+        # Validate user
+        validate_user = UserValidator(data)
+        validation_methods = [
+            validate_user.valid_email,
+            validate_user.valid_name,
+            validate_user.valid_phoneNumber,
+            validate_user.validate_password,
+            validate_user.matching_password
+        ]
+
+        for error in validation_methods:
+            if error():
+                return make_response(jsonify({
+                    "error": error()
+                }), 422)
+                
     user_data = {
         "first_name": data['first_name'],
         "last_name": data['last_name'],

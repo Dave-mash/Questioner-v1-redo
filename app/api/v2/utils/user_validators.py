@@ -25,6 +25,7 @@ class UserValidator:
             "unmatching_pass": "Your passwords don't match!",
             "valid_Fname": "please enter valid first name!",
             "valid_Lname": "please enter valid last name!",
+            "valid_username": "please enter valid username!",
             "valid_othername": "please enter valid othername!"
         }
         return errors[error_name]
@@ -67,6 +68,8 @@ class UserValidator:
             return self.errorHandler('valid_Lname')
         elif not field_names['othername'].isalpha():
             return self.errorHandler('valid_othername')
+        elif not field_names['username'].isalpha():
+            return self.errorHandler('valid_username')
 
         for key, value in field_names.items():
             if len(value) < 3 or len(value) > 25:

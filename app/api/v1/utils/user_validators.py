@@ -67,6 +67,8 @@ class UserValidator:
             return self.errorHandler('valid_Lname')
         elif not field_names['othername'].isalpha():
             return self.errorHandler('valid_othername')
+        elif not field_names['username'].isalpha():
+            return self.errorHandler('valid_username')
 
         for key, value in field_names.items():
             if len(value) < 3 or len(value) > 25:

@@ -9,7 +9,7 @@ class InitializeDb:
         try:
             self.connection = psycopg2.connect(url)
             self.cursor = self.connection.cursor()
-            print('A connection to questioner_db database was established!')
+            print(f'A connection to {url} database was established!')
         except:
             print('A problem occured while connecting to the database')
 
@@ -17,10 +17,9 @@ class InitializeDb:
     def create_tables(self):
         """ This method creates tables """
 
-        # users
         self.cursor.execute(
             """
-                CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS users (
                 id serial PRIMARY KEY NOT NULL,
                 first_name TEXT NOT NULL,
                 last_name TEXT NOT NULL,
@@ -30,40 +29,55 @@ class InitializeDb:
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 isAdmin BOOLEAN NOT NULL,
-                date_registered INT NOT NULL
-                );
-            """
-        )
-
-        # meetups
-        self.cursor.execute(
-            """
-                CREATE TABLE IF NOT EXISTS meetups (
+                date_registered TIMESTAMP DEFAULT current_timestamp
+            );
+            CREATE TABLE IF NOT EXISTS blacklist (
                 id serial PRIMARY KEY NOT NULL,
-                admin_id INT unique NOT NULL,
-                location TEXT NOT NULL,
+                tokens VARCHAR NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS meetups (
+                id serial PRIMARY KEY NOT NULL,
+                authorId INT REFERENCES users(id) ON \
+                UPDATE CASCADE ON DELETE CASCADE,
                 topic TEXT NOT NULL,
-                created_on TIMESTAMP NOT NULL,
                 description TEXT NOT NULL,
-                schedule INT NOT NULL,
-                tags VARCHAR NOT NULL
-                );
-            """
-        )
-
-
-        self.cursor.execute(
-            """
-                CREATE TABLE IF NOT EXISTS posts (
+                schedule TEXT NOT NULL,
+                location TEXT NOT NULL,
+                tags VARCHAR [],
+                images VARCHAR [],
+                createdOn TIMESTAMP DEFAULT current_timestamp
+            );
+            CREATE TABLE IF NOT EXISTS rsvps(
                 id serial PRIMARY KEY NOT NULL,
-                topic TEXT NOT NULL,
-                description TEXT NOT NULL
-                );
+                meetupId INT REFERENCES meetups(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                userId INT REFERENCES users(id),
+                status VARCHAR (5),
+                dateConfirmed TIMESTAMP DEFAULT current_timestamp
+            );
+            CREATE TABLE IF NOT EXISTS questions(
+                id serial PRIMARY KEY NOT NULL,
+                authorId INT REFERENCES users(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                meetupId INT REFERENCES users(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                body TEXT NOT NULL,
+                totalVotes INT DEFAULT 0,              
+                createdOn TIMESTAMP DEFAULT current_timestamp
+            );
+            CREATE TABLE IF NOT EXISTS comments(
+                id serial PRIMARY KEY NOT NULL,
+                userId INT REFERENCES users(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                questionId INT REFERENCES questions(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                comment TEXT NOT NULL
+            );
             """
         )
-        
+
         self.connection.commit()
-        # self.cursor.close()
 
     
     def execute(self, query):
@@ -94,6 +108,12 @@ class InitializeDb:
         self.cursor.execute(query)
         self.connection.commit()
 
+    def drop_tables(self):
+        """ This method drops all tables """
+        
+        self.cursor.execute("DROP TABLE IF EXISTS users, posts, meetups, rsvps, questions, comments CASCADE;")
+        self.connection.commit()
+
 
 # TIME
 # from datetime import datetime
@@ -106,10 +126,13 @@ class InitializeDb:
      # timestamp = 34103718234.89098
      # time = datetime.fromtimestamp(timestamp)
  
-# DICTIONARIES
-# b = {
-#    "one": 1,
-#    "two": 2
-# }
-# list(b) --> 'one', 'two'
-# list(b.values()) --> 1, 2
+
+            # CREATE TABLE IF NOT EXISTS votes(
+            #     id serial PRIMARY KEY NOT NULL,
+            #     questionId INT REFERENCES questions(id)\
+            #     ON UPDATE CASCADE ON DELETE CASCADE,
+            #     voterId INT REFERENCES users(id)\
+            #     ON UPDATE CASCADE ON DELETE CASCADE,
+            #     totalVotes INT REFERENCES questions(totalVotes)\
+            #     ON UPDATE CASCADE ON DELETE CASCADE
+            # );
