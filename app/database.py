@@ -4,7 +4,6 @@ import os
 class InitializeDb:
     """ This class sets up database connection and creates tables """
 
-
     def __init__(self, url):
         try:
             self.connection = psycopg2.connect(url)
@@ -66,6 +65,12 @@ class InitializeDb:
                 totalVotes INT DEFAULT 0,              
                 createdOn TIMESTAMP DEFAULT current_timestamp
             );
+            CREATE TABLE IF NOT EXISTS votes(
+                id serial PRIMARY KEY NOT NULL,
+                questionId INT REFERENCES questions(id)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                voters TEXT []
+            );
             CREATE TABLE IF NOT EXISTS comments(
                 id serial PRIMARY KEY NOT NULL,
                 userId INT REFERENCES users(id)\
@@ -83,9 +88,9 @@ class InitializeDb:
     def execute(self, query):
         """ This method saves values into the db """
         
+        print(query)
         self.cursor.execute(query)
         self.connection.commit()
-        print('executed')
     
     
     def fetch_all(self, query):
@@ -111,7 +116,7 @@ class InitializeDb:
     def drop_tables(self):
         """ This method drops all tables """
         
-        self.cursor.execute("DROP TABLE IF EXISTS users, posts, meetups, rsvps, questions, comments CASCADE;")
+        self.cursor.execute("DROP TABLE IF EXISTS users, posts, meetups, rsvps, questions, votes, comments CASCADE;")
         self.connection.commit()
 
 
@@ -126,13 +131,3 @@ class InitializeDb:
      # timestamp = 34103718234.89098
      # time = datetime.fromtimestamp(timestamp)
  
-
-            # CREATE TABLE IF NOT EXISTS votes(
-            #     id serial PRIMARY KEY NOT NULL,
-            #     questionId INT REFERENCES questions(id)\
-            #     ON UPDATE CASCADE ON DELETE CASCADE,
-            #     voterId INT REFERENCES users(id)\
-            #     ON UPDATE CASCADE ON DELETE CASCADE,
-            #     totalVotes INT REFERENCES questions(totalVotes)\
-            #     ON UPDATE CASCADE ON DELETE CASCADE
-            # );

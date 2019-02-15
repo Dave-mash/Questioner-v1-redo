@@ -2,70 +2,74 @@
 This module sets up the comment model and all it's functionality
 """
 
-from datetime import datetime
+import os
+from flask import jsonify
 
 from app.api.v2.models.base_model import BaseModel, AuthenticationRequired
 
 class Comment(BaseModel):
     
-    base_model = BaseModel('comment_db')
-
-    def __init__(self, comment={}):
+    def __init__(self, comment={}, database=os.getenv('FLASK_DATABASE_URI')):
+    
+        self.base_model = BaseModel('comments', database)
 
         if comment:
-            self.id = len(self.fetch_comments())
-            self.createdOn = datetime.now()
-            self.question = comment['question']
-            self.title = comment['title']
-            self.body = comment['body']
             self.comment = comment['comment']
+            self.userId = comment['authorId']
+            self.questionId = comment['questionId']
 
-    def errorParser(self, meetup, question, comment):
-
-        def error(error):
-            return { "error": "No {} found!".format(error) }
-
-        if not meetup:
-            return error('meetup')
-
-        elif not question:
-            return error('question')
-
-        elif not comment:
-            return error('comment')
 
     def save_comment(self):
+        """ This method saves a comment """
 
-        comment_item = {
-            "id": self.id,
-            "question": self.question,
-            "createdOn": self.createdOn,
-            "title": self.title,
-            "body": self.body,
-            "comment": self.comment
+        comment_item = dict(
+            userId=self.userId,
+            questionId=self.questionId,
+            comment=self.comment
+        )
+
+        keys = ", ".join(comment_item.keys())
+        values = tuple(comment_item.values())
+        self.base_model.add_item(keys, values)
+
+
+    def fetch_comments(self, fields):
+        """ This method fetches all comments """
+
+        return self.base_model.grab_all_items(f'{fields}', "True = True")
+
+
+    def fetch_specific_comment(self, column, condition):
+        """ This method fetches a single comment """
+
+        return self.base_model.grab_items_by_name(column, condition)
+
+
+    def update_comment(self, id, updates):
+        """ This method updates a comment """
+
+        pairs_dict = {
+            "comment": f"comment = '{updates['comment']}'",
         }
-
-        self.base_model.add_item(comment_item)
-
-    def fetch_comments(self):
-
-        return self.base_model.comments_list
-
-    def fetch_specific_comment(self, id):
-
-        db = self.base_model.comments_list
-        comment = [comment for comment in db if comment['id'] == id]
-
-        if comment:
-            return comment[0]
+        
+        pairs = ", ".join(pairs_dict.values())
+        
+        if self.fetch_specific_comment('id', f"id = {id}"):
+            return self.base_model.update_item(pairs, f"id = {id}")
         else:
-            return False
+            return jsonify({
+                "error": "Comment not found or does not exist!",
+                "status": 404
+            })
 
-
-    def edit_comment(self, id, udpates):
-
-        self.base_model.edit_item(id, udpates)
 
     def delete_comment(self, id):
+        """ This method deletes a comment """
 
-        self.base_model.delete_item(id)
+        if self.fetch_specific_comment('id', f"id = {id}"):
+            return self.base_model.delete_item(f"id = {id}")
+        else:
+            return jsonify({
+                "error": "Comment not found or does not exist!",
+                "status": 400
+            })

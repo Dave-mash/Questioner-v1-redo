@@ -8,16 +8,16 @@ from flask import Blueprint
 from flask import request, jsonify, make_response, Blueprint
 
 from app.api.v2.models.question import Question, AuthenticationRequired
-from app.api.v2.models.meetup import Meetup
 from app.api.v2.models.comment import Comment
+from app.api.v2.models.user import User
 
 v2 = Blueprint('commentv2', __name__, url_prefix='/api/v2/')
 
 
 """ This route posts a comment on a question """
-@v2.route("/<int:questionId>/comments", methods=['POST'])
+@v2.route("/<int:userId>/<int:questionId>/comments", methods=['POST'])
 @AuthenticationRequired
-def comment_on_question(questionId):
+def comment_on_question(questionId, userId):
     data = request.get_json()
 
     try:
@@ -26,19 +26,18 @@ def comment_on_question(questionId):
         return jsonify({
             "error": 'You missed the {} key, value pair'.format(data['comment'])
         })
+        
+    question = Question().fetch_specific_question('id', f"id = {questionId}")
+    user = User().fetch_specific_user('id', f"id = {userId}")
 
-    questions = Question().fetch_questions()
-    question = [question for question in questions if question['id'] == questionId]
-
-    if question:
+    if question and user:
     
         comment = {
-            "question": questionId,
-            "title": question[0]['title'],
-            "body": question[0]['body'],
-            "comment": data['comment']
+            "authorId": userId,
+            "comment": data['comment'],
+            "questionId": questionId,
         }
-    
+
         comment_model = Comment(comment)
 
         comment_model.save_comment()
@@ -48,58 +47,71 @@ def comment_on_question(questionId):
             "message": "You have successfully commented on this question",
             "data": [{
                 "question": questionId,
-                "title": comment['title'],
-                "body": comment['body'],
                 "comment": comment['comment']
             }]
         }), 201)
-    else:
+    elif not question:
         return make_response(jsonify({
             "error": "Question not found or does not exist",
             "status": 404
         }), 404)
+    elif not user:
+        return make_response(jsonify({
+            "error": "User not found or does not exist",
+            "status": 404
+        }), 404)
 
 
-""" This route edits a comment """
-@v2.route("/<int:meetupId>/<int:questionId>/<int:commentId>", methods=['PATCH'])
+""" This route updates a comment """
+@v2.route("/<int:userId>/comments/<int:commentId>", methods=['PUT'])
 @AuthenticationRequired
-def edit_comment(questionId, commentId, meetupId):
+def edit_comment(userId, commentId):
     data = request.get_json()
 
-    meetup = Meetup().fetch_specific_meetup(meetupId)
-    question = Question().fetch_specific_question(questionId)
-    comment = Comment().fetch_specific_comment(commentId)
-
-    if question and comment and meetup:
-
-        updates = {
-            "comment": data['comment']
-        }
-
-        Comment().edit_comment(commentId, updates)
+    try:
+        data['comment']
+    except:
         return jsonify({
-            "status": 200,
-            "message": "Comment with id '{}' was updated".format(commentId)
-        }), 200
+            "error": 'You missed the {} key, value pair'.format(data['comment'])
+        })
+     
+    if Comment().fetch_specific_comment('userId', f"id = {commentId}")[0] == userId:
+        
+        comment = Comment().update_comment(commentId, data)
+        
+        if isinstance(comment, dict):
+            return make_response(comment, 404)
+        else:
+            return make_response(jsonify({
+                "message": "You have successfully updated this comment",
+                "status": 200
+            }), 200)
     else:
-        return Comment().errorParser(meetup, question, comment)
-
+        return make_response(jsonify({
+            "error": "You are not authorized to perform this action!",
+            "status": 401
+        }), 401)
+        
 
 """ This route deletes a comment """
-@v2.route("/<int:meetupId>/<int:questionId>/<int:commentId>", methods=['DELETE'])
+@v2.route("/<int:userId>/comments/<int:commentId>", methods=['DELETE'])
 @AuthenticationRequired
-def delete_comment(questionId, commentId, meetupId):
+def delete_comment(userId, commentId):
 
-    meetup = Meetup().fetch_specific_meetup(meetupId)
-    question = Question().fetch_specific_question(questionId)
-    comment = Comment().fetch_specific_comment(commentId)
+    if Comment().fetch_specific_comment('userId', f"id = {commentId}")[0] == userId:
+        
+        comment = Comment().delete_comment(commentId)
 
-    if question and comment and meetup:
-        Comment().delete_comment(commentId)
-        return jsonify({
-            "status": 200,
-            "message": "Comment with id '{}' was deleted".format(commentId)
-        }), 200
+        if isinstance(comment, dict):
+            return make_response(jsonify(comment), 404)
+        else:
+            return make_response(jsonify({
+                "error": 'comment was deleted successfully',
+                "status": 200
+            }), 200)
     else:
-        return Comment().errorParser(meetup, question, comment)
+        return make_response(jsonify({
+            "error": "You are not authorized to perform this action!",
+            "status": 401
+        }), 401)
 

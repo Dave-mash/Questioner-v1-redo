@@ -60,59 +60,63 @@ class BaseModel:
             return 'Invalid token. Please log in again.'
 
 
-    def grab_all_items(self, cols, condition):
+    def grab_all_items(self, cols, condition, name=''):
         """ This method fetches all items """
+        name = name if name else self.table_name
 
         return self.database.fetch_all(
-            "SELECT {} FROM {} WHERE {};".format(cols, self.table_name, condition)
+            "SELECT {} FROM {} WHERE {};".format(cols, name, condition)
         )
 
 
-    def grab_items_by_name(self, column, condition):
+    def grab_items_by_name(self, column, condition, name=''):
         """ This method fetches an item by name """
+        name = name if name else self.table_name
         
         return self.database.fetch_one(
-            "SELECT {} FROM {} WHERE {}".format(column, self.table_name, condition)
+            "SELECT {} FROM {} WHERE {}".format(column, name, condition)
         )
 
 
-    def grab_items(self, columns, name, condition):
+    def grab_items(self, columns, condition, name=''):
         """ This method fetches items """
+        name = name if name else self.table_name
 
         return self.database.fetch_all(
             "SELECT {} FROM {} WHERE {}".format(columns, name, condition)
         )
 
 
-    def add_item(self, keys, values):
+    def add_item(self, keys, values, name=''):
         """ This method adds an item """
-
-        return self.database.execute(
-            "INSERT INTO {} ({}) VALUES {};".format(self.table_name, keys, values)
-        )
-
-
-    def add_item_two(self, name, keys, values):
-        """ This method adds an item """
+        name = name if name else self.table_name
 
         return self.database.execute(
             "INSERT INTO {} ({}) VALUES {};".format(name, keys, values)
         )
 
 
-    def delete_item(self, condition):
+    def execute(self, query):
+        """ This method executes queries """
+
+        return self.database.execute(query)
+
+
+    def delete_item(self, condition, name=''):
         """ This method defines the delete item query """
+        name = name if name else self.table_name
         
         return self.database.update(
-            "DELETE FROM {} WHERE {}".format(self.table_name, condition)
+            "DELETE FROM {} WHERE {}".format(name, condition)
         )
 
        
-    def update_item(self, updates, condition):
+    def update_item(self, updates, condition, name=''):
         """ This method defines the update item query """
+        name = name if name else self.table_name
 
         return self.database.update(
-            "UPDATE {} SET {} WHERE {}".format(self.table_name, updates, condition)
+            "UPDATE {} SET {} WHERE {}".format(name, updates, condition)
         )
 
 

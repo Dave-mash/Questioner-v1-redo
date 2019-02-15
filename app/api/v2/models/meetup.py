@@ -2,15 +2,12 @@
 This module sets up the meetups model and all it's functionality
 """
 
-from datetime import datetime
 import os
 from flask import jsonify
 
-from app.api.v2.models.question import Question
 from app.api.v2.models.base_model import BaseModel, AuthenticationRequired
 
 class Meetup(BaseModel):
-
 
     def __init__(self, meetup={}, database=os.getenv('FLASK_DATABASE_URI')):
 
@@ -48,7 +45,7 @@ class Meetup(BaseModel):
 
         keys = ", ".join(rsvp.keys())
         values = tuple(rsvp.values())
-        self.base_model.add_item_two('rsvps', keys, values)
+        self.base_model.add_item(keys, values, 'rsvps')
 
 
     def cancel_rsvp(self, id):
@@ -74,7 +71,7 @@ class Meetup(BaseModel):
 
 
     def update_meetup(self, id, updates):
-        """ This method defines the update query """
+        """ This method updates a meetup """
 
         pairs_dict = {
             "topic": f"topic = '{updates['topic']}'",
@@ -98,7 +95,7 @@ class Meetup(BaseModel):
 
 
     def delete_meetup(self, id):
-        """ This method defines the delete query """
+        """ This method deletes a meetup """
 
         if self.fetch_specific_meetup('id', f"id = {id}"):
             return self.base_model.delete_item(f"id = {id}")
@@ -106,5 +103,3 @@ class Meetup(BaseModel):
             return {
                 "error": "Meetup not found or does not exist!"
             }
-
-            
