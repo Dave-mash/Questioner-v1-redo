@@ -1,5 +1,5 @@
 """
-This module tests that the base model works correctly
+This module contains tests for the base model
 """
 
 # 3rd party imports
@@ -14,10 +14,32 @@ class TestBaseModel(unittest.TestCase):
         self.meetup = BaseModel('meetup_db')
         self.questions = BaseModel('question_db')
         self.users = BaseModel('user_db')
+        self.comments = BaseModel('comment_db')
 
         self.meetup_item = {"content": 'item', "id": 1}
-        self.user_item = {"question": 'a question', "id": 1}
+        self.user_item = {
+            "id": 20,
+            "first_name" : "David",
+            "last_name" : "Mwangi",
+            "othername" : "Dave",
+            "email" : "jjj@demo.com",
+            "phoneNumber" : "+254729710290",
+            "username" : "jjj",
+            "password": "abc123@1A",
+            "confirm_password": "abc123@1A"
+        }
         self.question_item = {"name": 'dave', "id": 1}
+
+    def test_encode_auth_token(self):
+        
+        auth_token = self.users.encode_auth_token(1)
+        self.assertTrue(isinstance(auth_token, bytes))
+
+    def test_decode_auth_token(self):
+
+        auth_token = self.users.encode_auth_token(1)
+        self.assertTrue(isinstance(auth_token, bytes))
+        self.assertTrue(self.users.decode_auth_token(auth_token) == 1)
 
     def test_check_db(self):
         """ Test base model's check_db method  works as expected """
@@ -36,6 +58,11 @@ class TestBaseModel(unittest.TestCase):
         self.users.check_db()
         self.assertEqual(self.users.db_name, 'user_db')
         self.assertEqual(self.users.db, self.users.users_list)
+
+        # test comments_db
+        self.comments.check_db()
+        self.assertEqual(self.comments.db_name, 'comment_db')
+        self.assertEqual(self.comments.db, self.comments.comments_list)
 
         # test invalid db_name
         other = BaseModel('other')
@@ -100,7 +127,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertFalse(self.questions.db)
 
         # test users list
-        self.users.delete_item(1)
+        self.users.delete_item(20)
         self.assertFalse(self.users.db)
     
     def tearDown(self):

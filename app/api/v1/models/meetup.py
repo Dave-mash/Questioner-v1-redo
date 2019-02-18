@@ -1,8 +1,11 @@
-""" This module sets up the meetups model and all it's functionality """
+"""
+This module sets up the meetups model and all it's functionality
+"""
 
 from datetime import datetime
 
 from app.api.v1.models.base_model import BaseModel
+from app.api.v1.models.question import Question
 
 class Meetup(BaseModel):
 
@@ -15,7 +18,7 @@ class Meetup(BaseModel):
             self.createdOn = datetime.now()
             self.location = meetup['location']
             self.images = meetup['images']
-            self.topic = meetup['topic']
+            self.title = meetup['title']
             self.happeningOn = meetup['happeningOn']
             self.tags = meetup['tags']
 
@@ -26,9 +29,9 @@ class Meetup(BaseModel):
             "createdOn": self.createdOn,
             "location": self.location,
             "images": self.images,
-            "topic": self.topic,
+            "title": self.title,
             "happeningOn": self.happeningOn,
-            "tags": self.tags
+            "tags": self.tags,
         }
 
         self.base_model.add_item(meetup_item)

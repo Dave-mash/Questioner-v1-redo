@@ -8,7 +8,7 @@ class Config(object):
     """Parent configuration class."""
     DEBUG = False
     TESTING = False
-    SECRET = os.getenv('SECRET')
+    SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 class Development(Config):
