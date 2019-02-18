@@ -58,10 +58,14 @@ class TestUser(unittest.TestCase):
             "password": "abc123@1A",
             "confirm_password": "abc123@1A"
         }
-        payload = self.post_req(data=user)
-        # self.assertEqual(payload.json['status'], 201)
-        # self.assertTrue(payload.json['auth_token'])
-        # self.assertEqual(payload.json['message'], "josh@email.com registered successfully")
+        user2 = { **user }
+        user2['username'] = 'abc'
+        user2['email'] = 'abc@demo.com'
+
+        payload = self.post_req(data=user2)
+        self.assertEqual(payload.json['status'], 201)
+        self.assertTrue(payload.json['auth_token'])
+        self.assertEqual(payload.json['message'], "abc@demo.com registered successfully")
 
         # test missing fields
         user = {

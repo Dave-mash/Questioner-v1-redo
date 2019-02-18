@@ -50,13 +50,13 @@ class TestBaseModel(unittest.TestCase):
         values = tuple(self.user_item.values())
         self.base_model.add_item(keys, values)
 
-        self.assertTrue(self.base_model.grab_items_by_name('username', 'username', 'dave'))
+        self.assertTrue(self.base_model.grab_items_by_name('username', "username = 'dave'"))
 
 
     def test_grab_all_items(self):
         """ Test the grab all items method works correctly """
         
-        users = self.base_model.grab_all_items('username', 'isAdmin', False)
+        users = self.base_model.grab_all_items('username', "isAdmin = False")
         
         # test with no items
         self.assertEqual(len(users), 0)
@@ -65,7 +65,7 @@ class TestBaseModel(unittest.TestCase):
         keys = ", ".join(self.user_item.keys())
         values = tuple(self.user_item.values())
         self.base_model.add_item(keys, values)
-        users2 = self.base_model.grab_all_items('username', 'isAdmin', False)
+        users2 = self.base_model.grab_all_items('username', "isAdmin = False")
         self.assertEqual(len(users2), 1)
 
 
@@ -75,7 +75,7 @@ class TestBaseModel(unittest.TestCase):
         keys = ", ".join(self.user_item.keys())
         values = tuple(self.user_item.values())
         self.base_model.add_item(keys, values)
-        users = self.base_model.grab_items_by_name('username', 'username', 'dave')[0]
+        users = self.base_model.grab_items_by_name('username', "username = 'dave'")[0]
         self.assertEqual(users, 'dave')
 
     def test_delete_item(self):
@@ -85,12 +85,12 @@ class TestBaseModel(unittest.TestCase):
         keys = ", ".join(self.user_item.keys())
         values = tuple(self.user_item.values())
         self.base_model.add_item(keys, values)
-        users = self.base_model.grab_all_items('username', 'isAdmin', False)
+        users = self.base_model.grab_all_items('username', "isAdmin = False")
         self.assertEqual(len(users), 1)
 
         # delete item
-        self.base_model.delete_item('id', 1)
-        users = self.base_model.grab_items_by_name('username', 'username', 'dave')
+        self.base_model.delete_item("id = 1")
+        users = self.base_model.grab_items_by_name('username', "username = 'dave'")
         self.assertFalse(users)
         
 
@@ -101,12 +101,12 @@ class TestBaseModel(unittest.TestCase):
         keys = ", ".join(self.user_item.keys())
         values = tuple(self.user_item.values())
         self.base_model.add_item(keys, values)
-        users = self.base_model.grab_all_items('username', 'isAdmin', False)
+        users = self.base_model.grab_all_items('username', "isAdmin = False")
         self.assertEqual(len(users), 1)
 
         # update item
-        self.base_model.update_item("username = 'Davee'", 1)
-        self.assertTrue(self.base_model.grab_items_by_name('username', 'username', 'Davee'))
+        self.base_model.update_item("username = 'Davee'", "id = 1")
+        self.assertTrue(self.base_model.grab_items_by_name('username', "username = 'Davee'"))
 
 
     def tearDown(self):

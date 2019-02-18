@@ -34,7 +34,7 @@ class TestBaseModel(unittest.TestCase):
 
         # add item
         self.user.save_user()
-        user = self.user.fetch_specific_user('username', 'username', 'dave')
+        user = self.user.fetch_specific_user('username', "username = 'dave'")
         self.assertTrue(user)
 
 
@@ -63,7 +63,7 @@ class TestBaseModel(unittest.TestCase):
         """ Test fetch specific user method works correctly """
 
         self.user.save_user()
-        self.assertTrue(self.user.fetch_specific_user('id', 'username', 'dave'))
+        self.assertTrue(self.user.fetch_specific_user('id', "username = 'dave'"))
 
 
     def test_log_in_user(self):
@@ -81,7 +81,7 @@ class TestBaseModel(unittest.TestCase):
         """ Test make admin method works correctly """
 
         self.user.save_user()
-        admin = self.user.fetch_specific_user('isAdmin', 'username', 'dave')[0]
+        admin = self.user.fetch_specific_user('isAdmin', "username = 'dave'")[0]
         self.assertEqual(admin, False)
         # self.user.make_admin(1)
         # self.assertEqual(admin, True)
