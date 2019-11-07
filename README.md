@@ -2,7 +2,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintainability](https://api.codeclimate.com/v1/badges/180499f84459b335085e/maintainability)](https://codeclimate.com/github/Dave-mash/Questioner-v1-redo/maintainability)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a511c4420c0b4e6f9538e6b93814f275)](https://www.codacy.com/app/macharia3041/Questioner-v1-redo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Dave-mash/Questioner-v1-redo&amp;utm_campaign=Badge_Grade)
-[![Build Status](https://travis-ci.org/Dave-mash/Questioner-v1-redo.svg?branch=develop)](https://travis-ci.org/Dave-mash/Questioner-v1-redo)
 [![Coverage Status](https://coveralls.io/repos/github/Dave-mash/Questioner-v1-redo/badge.svg?branch=develop)](https://coveralls.io/github/Dave-mash/Questioner-v1-redo?branch=develop)
 ## The following are API endpoints enabling one to:
 * Create an account and log in.
